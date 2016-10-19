@@ -28,22 +28,24 @@
 
 
 namespace cm {
-typedef enum {
-  kNetSend = 0,
-  kNetRecv = 1
-} kNetQueueType;
-
 class NetworkManager {
  public:
   static NetworkManager *get_instance(void);
 
-  void install_network_adapter(NetworkAdapter *na);
-  void remove_network_adapter(NetworkAdapter *na);
+  void install_data_adapter(NetworkAdapter *na);
+  void remove_data_adapter(NetworkAdapter *na);
+
+  void install_control_adapter(NetworkAdapter *na);
+  void remove_control_adapter(NetworkAdapter *na);
  private:
+  typedef enum {
+    kNetCtrl = 0,
+    kNetData = 1
+  } ListType;
   NetworkManager(void);
 
-  std::mutex lock;
-  std::list<NetworkAdapter *> adapter_list;
+  std::mutex lock[2];
+  std::list<NetworkAdapter *> adapter_list[2];
 };
 } /* namespace cm */
 #endif  /* INC_NETWORK_MANAGER_H_ */

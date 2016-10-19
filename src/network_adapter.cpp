@@ -29,7 +29,7 @@
 
 namespace cm {
 NetworkAdapter::NetworkAdapter() {
-  NetworkManager::get_instance()->install_network_adapter(this);
+  at = kATUnknown;
   stat = kDevOff;
   device_on_cb = NULL;
   device_off_cb = NULL;
@@ -42,7 +42,15 @@ NetworkAdapter::NetworkAdapter() {
 }
 NetworkAdapter::~NetworkAdapter() {
   dev_off();
-  NetworkManager::get_instance()->remove_network_adapter(this);
+
+  switch (at) {
+    case kATCtrl:
+      NetworkManager::get_instance()->remove_control_adapter(this);
+      break;
+    case kATData:
+      NetworkManager::get_instance()->remove_data_adapter(this);
+      break;
+  }
 }
 
 void NetworkAdapter::dev_switch(DevState stat, DevStatCb cb) {
@@ -64,6 +72,14 @@ void NetworkAdapter::dev_switch(DevState stat, DevStatCb cb) {
       std::thread(&NetworkAdapter::connect, this).detach();
       break;
   }
+}
+
+void NetworkAdapter::set_data_adapter(void) {
+  NetworkManager::get_instance()->install_data_adapter(this);
+}
+
+void NetworkAdapter::set_control_adapter(void) {
+  NetworkManager::get_instance()->install_control_adapter(this);
 }
 
 DevState NetworkAdapter::get_stat() {
@@ -100,8 +116,10 @@ void NetworkAdapter::connect(void) {
   if (stat == kDevDiscon || stat == kDevOn) {
     bool res = make_connection();
     if (res) {
-      th_sender = new std::thread(std::bind(&NetworkAdapter::run_sender, this));
-      th_recver = new std::thread(std::bind(&NetworkAdapter::run_recver, this));
+      if (at == kATData) {
+        th_sender = new std::thread(std::bind(&NetworkAdapter::run_sender, this));
+        th_recver = new std::thread(std::bind(&NetworkAdapter::run_recver, this));
+      }
 
       stat = kDevCon;
     }

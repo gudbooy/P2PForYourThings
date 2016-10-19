@@ -15,7 +15,27 @@
  * limitations under the License.
  */
 
+#ifndef DEVICE_INC_TCP_SERVER_OVER_WFD_H_
+#define DEVICE_INC_TCP_SERVER_OVER_WFD_H_
+
 #include <network_adapter.h>
 
 #include <dbug_log.h>
 
+namespace cm {
+class TCPServerOverWfdAdapter : public NetworkAdapter {
+ public:
+  TCPServerOverWfdAdapter(int port);
+
+ private:
+  int port;
+  bool device_on();
+  bool device_off();
+  bool make_connection();
+  bool close_connection();
+  bool send();
+  bool recv();
+};
+}  /* namespace cm */
+
+#endif  // DEVICE_INC_TCP_SERVER_OVER_WFD_H_

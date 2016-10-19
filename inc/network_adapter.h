@@ -40,6 +40,8 @@ typedef void (*DevStatCb)(DevState res);
 class NetworkAdapter {
  public:
   virtual void dev_switch(DevState stat, DevStatCb cb) final;
+  virtual void set_data_adapter(void) final;
+  virtual void set_control_adapter(void) final;
 
   NetworkAdapter();
   ~NetworkAdapter();
@@ -66,10 +68,19 @@ class NetworkAdapter {
   virtual bool send(const void *buf, size_t len) = 0;
   virtual bool recv(void *buf, size_t len) = 0;
 
+  // Property information
+  virtual uint32_t get_id(void) = 0;
+
  private:
+  typedef enum {
+    kATUnknown = 0,
+    kATCtrl = 1,
+    kATData = 2
+  } AdapterType;
   std::thread *th_sender;
   std::thread *th_recver;
 
+  AdapterType at;
   DevState stat;
   std::mutex dev_on_lock;
   std::mutex dev_off_lock;

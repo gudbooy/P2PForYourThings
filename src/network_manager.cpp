@@ -38,14 +38,24 @@ NetworkManager *NetworkManager::get_instance() {
 NetworkManager::NetworkManager(void) {
 }
 
-void NetworkManager::install_network_adapter(NetworkAdapter *na) {
-  std::unique_lock<std::mutex> lck(lock);
-  adapter_list.push_back(na);
+void NetworkManager::install_data_adapter(NetworkAdapter *na) {
+  std::unique_lock<std::mutex> lck(lock[kNetData]);
+  adapter_list[kNetData].push_back(na);
 }
 
-void NetworkManager::remove_network_adapter(NetworkAdapter *na) {
-  std::unique_lock<std::mutex> lck(lock);
-  adapter_list.remove(na);
+void NetworkManager::remove_data_adapter(NetworkAdapter *na) {
+  std::unique_lock<std::mutex> lck(lock[kNetData]);
+  adapter_list[kNetData].remove(na);
+}
+
+void NetworkManager::install_control_adapter(NetworkAdapter *na) {
+  std::unique_lock<std::mutex> lck(lock[kNetCtrl]);
+  adapter_list[kNetCtrl].remove(na);
+}
+
+void NetworkManager::remove_control_adapter(NetworkAdapter *na) {
+  std::unique_lock<std::mutex> lck(lock[kNetCtrl]);
+  adapter_list[kNetCtrl].remove(na);
 }
 
 } /* namespace cm */
